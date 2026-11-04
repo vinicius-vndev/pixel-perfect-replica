@@ -10,33 +10,120 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
+import { Route as AuthenticatedPainelIndexRouteImport } from './routes/_authenticated/painel.index'
+import { Route as AuthenticatedPainelAgendaRouteImport } from './routes/_authenticated/painel.agenda'
+import { Route as AuthenticatedPainelAgendamentosRouteImport } from './routes/_authenticated/painel.agendamentos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPainelIndexRoute =
+  AuthenticatedPainelIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
+const AuthenticatedPainelAgendaRoute =
+  AuthenticatedPainelAgendaRouteImport.update({
+    id: '/agenda',
+    path: '/agenda',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
+const AuthenticatedPainelAgendamentosRoute =
+  AuthenticatedPainelAgendamentosRouteImport.update({
+    id: '/agendamentos',
+    path: '/agendamentos',
+    getParentRoute: () => AuthenticatedPainelRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/painel': typeof AuthenticatedPainelRouteWithChildren
+  '/painel/agenda': typeof AuthenticatedPainelAgendaRoute
+  '/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
+  '/painel/': typeof AuthenticatedPainelIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/painel/agenda': typeof AuthenticatedPainelAgendaRoute
+  '/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
+  '/painel': typeof AuthenticatedPainelIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/painel': typeof AuthenticatedPainelRouteWithChildren
+  '/_authenticated/painel/agenda': typeof AuthenticatedPainelAgendaRoute
+  '/_authenticated/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
+  '/_authenticated/painel/': typeof AuthenticatedPainelIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/painel'
+    | '/painel/agenda'
+    | '/painel/agendamentos'
+    | '/painel/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/painel/agenda'
+    | '/painel/agendamentos'
+    | '/painel'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/reset-password'
+    | '/_authenticated/painel'
+    | '/_authenticated/painel/agenda'
+    | '/_authenticated/painel/agendamentos'
+    | '/_authenticated/painel/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +135,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/painel': {
+      id: '/_authenticated/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof AuthenticatedPainelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/painel/': {
+      id: '/_authenticated/painel/'
+      path: '/'
+      fullPath: '/painel/'
+      preLoaderRoute: typeof AuthenticatedPainelIndexRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
+    '/_authenticated/painel/agenda': {
+      id: '/_authenticated/painel/agenda'
+      path: '/agenda'
+      fullPath: '/painel/agenda'
+      preLoaderRoute: typeof AuthenticatedPainelAgendaRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
+    '/_authenticated/painel/agendamentos': {
+      id: '/_authenticated/painel/agendamentos'
+      path: '/agendamentos'
+      fullPath: '/painel/agendamentos'
+      preLoaderRoute: typeof AuthenticatedPainelAgendamentosRouteImport
+      parentRoute: typeof AuthenticatedPainelRoute
+    }
   }
 }
 
+interface AuthenticatedPainelRouteChildren {
+  AuthenticatedPainelAgendaRoute: typeof AuthenticatedPainelAgendaRoute
+  AuthenticatedPainelAgendamentosRoute: typeof AuthenticatedPainelAgendamentosRoute
+  AuthenticatedPainelIndexRoute: typeof AuthenticatedPainelIndexRoute
+}
+
+const AuthenticatedPainelRouteChildren: AuthenticatedPainelRouteChildren = {
+  AuthenticatedPainelAgendaRoute: AuthenticatedPainelAgendaRoute,
+  AuthenticatedPainelAgendamentosRoute: AuthenticatedPainelAgendamentosRoute,
+  AuthenticatedPainelIndexRoute: AuthenticatedPainelIndexRoute,
+}
+
+const AuthenticatedPainelRouteWithChildren =
+  AuthenticatedPainelRoute._addFileChildren(AuthenticatedPainelRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPainelRoute: typeof AuthenticatedPainelRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPainelRoute: AuthenticatedPainelRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
