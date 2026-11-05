@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
+import { Route as EsteticaSlugRouteImport } from './routes/estetica.$slug'
 import { Route as AuthenticatedPainelIndexRouteImport } from './routes/_authenticated/painel.index'
 import { Route as AuthenticatedPainelAgendaRouteImport } from './routes/_authenticated/painel.agenda'
 import { Route as AuthenticatedPainelAgendamentosRouteImport } from './routes/_authenticated/painel.agendamentos'
@@ -45,6 +46,11 @@ const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const EsteticaSlugRoute = EsteticaSlugRouteImport.update({
+  id: '/estetica/$slug',
+  path: '/estetica/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedPainelIndexRoute =
   AuthenticatedPainelIndexRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/painel': typeof AuthenticatedPainelRouteWithChildren
+  '/estetica/$slug': typeof EsteticaSlugRoute
   '/painel/agenda': typeof AuthenticatedPainelAgendaRoute
   '/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
   '/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/estetica/$slug': typeof EsteticaSlugRoute
   '/painel/agenda': typeof AuthenticatedPainelAgendaRoute
   '/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
   '/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRouteWithChildren
+  '/estetica/$slug': typeof EsteticaSlugRoute
   '/_authenticated/painel/agenda': typeof AuthenticatedPainelAgendaRoute
   '/_authenticated/painel/agendamentos': typeof AuthenticatedPainelAgendamentosRoute
   '/_authenticated/painel/configuracoes': typeof AuthenticatedPainelConfiguracoesRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/painel'
+    | '/estetica/$slug'
     | '/painel/agenda'
     | '/painel/agendamentos'
     | '/painel/configuracoes'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/estetica/$slug'
     | '/painel/agenda'
     | '/painel/agendamentos'
     | '/painel/configuracoes'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/painel'
+    | '/estetica/$slug'
     | '/_authenticated/painel/agenda'
     | '/_authenticated/painel/agendamentos'
     | '/_authenticated/painel/configuracoes'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  EsteticaSlugRoute: typeof EsteticaSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -214,6 +227,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/painel'
       preLoaderRoute: typeof AuthenticatedPainelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/estetica/$slug': {
+      id: '/estetica/$slug'
+      path: '/estetica/$slug'
+      fullPath: '/estetica/$slug'
+      preLoaderRoute: typeof EsteticaSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/painel/': {
       id: '/_authenticated/painel/'
@@ -306,6 +326,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  EsteticaSlugRoute: EsteticaSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
