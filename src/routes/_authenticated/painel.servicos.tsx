@@ -87,16 +87,16 @@ function ServiceForm({ service, businessId, onDone }: { service: Service | null;
     e.preventDefault();
     const cents = parseBRLToCents(price);
     const dur = Number(duration);
-    if (name.trim().length < 2) return toast.error("Informe o nome do serviço.");
-    if (cents === null) return toast.error("Preço inválido. Ex.: 80,00");
-    if (!Number.isInteger(dur) || dur < 15 || dur > 720) return toast.error("Duração entre 15 e 720 minutos.");
+    if (name.trim().length < 2) { toast.error("Informe o nome do serviço."); return; }
+    if (cents === null) { toast.error("Preço inválido. Ex.: 80,00"); return; }
+    if (!Number.isInteger(dur) || dur < 15 || dur > 720) { toast.error("Duração entre 15 e 720 minutos."); return; }
     setSaving(true);
     const payload = { name: name.trim(), description: description.trim() || null, price_cents: cents, duration_minutes: dur, image_url: image };
     const { error } = service
       ? await supabase.from("services").update(payload).eq("id", service.id)
       : await supabase.from("services").insert({ ...payload, business_id: businessId });
     setSaving(false);
-    if (error) return toast.error("Não foi possível salvar.");
+    if (error) { toast.error("Não foi possível salvar."); return; }
     toast.success("Serviço salvo.");
     qc.invalidateQueries({ queryKey: ["services"] });
     qc.invalidateQueries({ queryKey: ["setup"] });

@@ -98,7 +98,7 @@ function CreateBusiness({ onSignOut }: { onSignOut: () => void }) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const s = slugify(slug || name);
-    if (s.length < 3) return toast.error("O link precisa ter pelo menos 3 caracteres.");
+    if (s.length < 3) { toast.error("O link precisa ter pelo menos 3 caracteres."); return; }
     setLoading(true);
     const { error } = await supabase.rpc("create_business", { _name: name, _slug: s });
     setLoading(false);

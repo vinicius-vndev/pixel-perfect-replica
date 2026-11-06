@@ -37,14 +37,14 @@ function BusinessForm() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     const wa = f.whatsapp.replace(/\D/g, "");
-    if (wa && (wa.length < 10 || wa.length > 13)) return toast.error("WhatsApp inválido. Use DDD + número.");
+    if (wa && (wa.length < 10 || wa.length > 13)) { toast.error("WhatsApp inválido. Use DDD + número."); return; }
     setSaving(true);
     const { error } = await supabase.from("businesses").update({
       name: f.name.trim(), description: f.description.trim() || null, phone: f.phone.trim() || null,
       whatsapp: wa || null, address: f.address.trim() || null, logo_url: f.logo_url, cover_url: f.cover_url,
     }).eq("id", b.id);
     setSaving(false);
-    if (error) return toast.error("Não foi possível salvar.");
+    if (error) { toast.error("Não foi possível salvar."); return; }
     toast.success("Dados salvos.");
     qc.invalidateQueries({ queryKey: ["my-business"] });
   }
@@ -90,11 +90,11 @@ function HoursForm() {
 
   async function save() {
     for (const r of rows) {
-      if (r.is_open && r.close_time <= r.open_time) return toast.error(`${WEEKDAYS[r.weekday]}: fechamento deve ser após a abertura.`);
-      if ((r.break_start && !r.break_end) || (!r.break_start && r.break_end)) return toast.error(`${WEEKDAYS[r.weekday]}: preencha início e fim do intervalo.`);
+      if (r.is_open && r.close_time <= r.open_time) { toast.error(`${WEEKDAYS[r.weekday]}: fechamento deve ser após a abertura.`); return; }
+      if ((r.break_start && !r.break_end) || (!r.break_start && r.break_end)) { toast.error(`${WEEKDAYS[r.weekday]}: preencha início e fim do intervalo.`); return; }
     }
     const { error } = await supabase.from("business_hours").upsert(rows.map((r) => ({ ...r, break_start: r.break_start || null, break_end: r.break_end || null })), { onConflict: "business_id,weekday" });
-    if (error) return toast.error("Não foi possível salvar os horários.");
+    if (error) { toast.error("Não foi possível salvar os horários."); return; }
     toast.success("Horários salvos.");
     qc.invalidateQueries({ queryKey: ["hours"] });
     qc.invalidateQueries({ queryKey: ["setup"] });
@@ -140,9 +140,9 @@ function Blocks() {
   });
   async function add(e: React.FormEvent) {
     e.preventDefault();
-    if (!date || to <= from) return toast.error("Informe data e horários válidos.");
+    if (!date || to <= from) { toast.error("Informe data e horários válidos."); return; }
     const { error } = await supabase.from("schedule_blocks").insert({ business_id: b.id, starts_at: zonedToUtc(date, from, b.timezone).toISOString(), ends_at: zonedToUtc(date, to, b.timezone).toISOString(), reason: reason || null });
-    if (error) return toast.error("Não foi possível bloquear.");
+    if (error) { toast.error("Não foi possível bloquear."); return; }
     setReason("");
     qc.invalidateQueries({ queryKey: ["blocks"] });
   }

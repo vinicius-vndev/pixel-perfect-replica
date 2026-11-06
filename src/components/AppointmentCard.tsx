@@ -53,7 +53,7 @@ const ACTION: Record<AppointmentStatus, { label: string; variant: "success" | "d
   pendente: { label: "", variant: "outline" },
 };
 
-export function AppointmentCard({ a, business, showDate = true }: { a: AppointmentRow; business: Business; showDate?: boolean }) {
+export function AppointmentCard({ a, business, showDate = true }: { a: AppointmentRow; business: Business; showDate?: boolean | undefined }) {
   const qc = useQueryClient();
   const tz = business.timezone;
   const m = useMutation({

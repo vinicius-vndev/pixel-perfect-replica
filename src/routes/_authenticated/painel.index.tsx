@@ -127,7 +127,7 @@ function Stat({ label, value, hint, highlight }: { label: string; value: React.R
   );
 }
 
-function Block({ title, empty, loading, items, b, showDate }: { title: string; empty: string; loading: boolean; items?: AppointmentRow[]; b: ReturnType<typeof useBusiness>; showDate?: boolean }) {
+function Block({ title, empty, loading, items, b, showDate }: { title: string; empty: string; loading: boolean; items?: AppointmentRow[] | undefined; b: ReturnType<typeof useBusiness>; showDate?: boolean | undefined }) {
   return (
     <section>
       <h2 className="mb-3 text-2xl font-semibold uppercase">{title}</h2>

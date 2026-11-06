@@ -86,8 +86,8 @@ function tzOffsetMinutes(date: Date, tz: string): number {
 
 /** Local wall-clock (YYYY-MM-DD, HH:mm) in tz -> UTC Date */
 export function zonedToUtc(ymd: string, hm: string, tz: string): Date {
-  const [y, m, d] = ymd.split("-").map(Number);
-  const [h, mi] = hm.split(":").map(Number);
+  const [y = 0, m = 1, d = 1] = ymd.split("-").map(Number);
+  const [h = 0, mi = 0] = hm.split(":").map(Number);
   const guess = Date.UTC(y, m - 1, d, h, mi);
   const off = tzOffsetMinutes(new Date(guess), tz);
   return new Date(guess - off * 60000);
@@ -98,13 +98,13 @@ export function ymdInTz(date: Date, tz: string): string {
 }
 
 export function addDaysYmd(ymd: string, n: number): string {
-  const [y, m, d] = ymd.split("-").map(Number);
+  const [y = 0, m = 1, d = 1] = ymd.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d + n));
   return dt.toISOString().slice(0, 10);
 }
 
 export function weekdayOfYmd(ymd: string): number {
-  const [y, m, d] = ymd.split("-").map(Number);
+  const [y = 0, m = 1, d = 1] = ymd.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
 }
 
@@ -148,7 +148,7 @@ export function buildWhatsAppConfirmation(input: {
   address: string | null;
   timezone: string;
 }): string {
-  const first = input.customerName.trim().split(/\s+/)[0];
+  const first = input.customerName.trim().split(/\s+/)[0] ?? "";
   const date = fmtDate(input.startsAt, input.timezone);
   const parts = [
     `Olá, ${first}! Seu agendamento na ${input.businessName} foi confirmado para ${date} às ${hourLabel(input.startsAt, input.timezone)}.`,
@@ -179,5 +179,5 @@ const BOOKING_ERRORS: Record<string, string> = {
 export function bookingErrorMessage(raw: string | undefined): string {
   if (!raw) return "Não foi possível enviar. Verifique sua conexão e tente novamente.";
   const key = Object.keys(BOOKING_ERRORS).find((k) => raw.includes(k));
-  return key ? BOOKING_ERRORS[key] : "Não foi possível enviar. Verifique sua conexão e tente novamente.";
+  return key ? (BOOKING_ERRORS[key] ?? "") : "Não foi possível enviar. Verifique sua conexão e tente novamente.";
 }
