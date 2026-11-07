@@ -1,3 +1,5 @@
+import { pageHead } from "@/lib/page-head";
+import { QueryError } from "@/components/QueryError";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -13,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-export const Route = createFileRoute("/_authenticated/painel/servicos")({ component: Services });
+export const Route = createFileRoute("/_authenticated/painel/servicos")({ head: () => pageHead("Serviços", "Gerencie os serviços da sua estética."), component: Services });
 
 function Services() {
   const b = useBusiness();
@@ -42,7 +44,7 @@ function Services() {
         <h1 className="text-4xl font-bold uppercase">Serviços</h1>
         <Button variant="hero" onClick={() => setEditing("new")}><Plus /> Novo serviço</Button>
       </div>
-      {q.isLoading ? <p className="text-muted-foreground">Carregando...</p> : !q.data?.length ? (
+      {q.error ? <QueryError onRetry={() => { void q.refetch(); }} /> : q.isLoading ? <p className="text-muted-foreground">Carregando...</p> : !q.data?.length ? (
         <p className="rounded-lg border border-dashed p-6 text-center text-muted-foreground">Nenhum serviço ainda. Ex.: lavagem técnica, higienização interna, polimento, vitrificação.</p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">

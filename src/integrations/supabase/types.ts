@@ -67,6 +67,8 @@ export type Database = {
           business_id: string
           created_at: string
           customer_id: string
+          declared_customer_name: string | null
+          declared_customer_phone: string | null
           duration_minutes: number
           ends_at: string
           id: string
@@ -79,11 +81,14 @@ export type Database = {
           status: Database["public"]["Enums"]["appointment_status"]
           updated_at: string
           vehicle_id: string | null
+          verified_origin_hash: string | null
         }
         Insert: {
           business_id: string
           created_at?: string
           customer_id: string
+          declared_customer_name?: string | null
+          declared_customer_phone?: string | null
           duration_minutes: number
           ends_at: string
           id?: string
@@ -96,11 +101,14 @@ export type Database = {
           status?: Database["public"]["Enums"]["appointment_status"]
           updated_at?: string
           vehicle_id?: string | null
+          verified_origin_hash?: string | null
         }
         Update: {
           business_id?: string
           created_at?: string
           customer_id?: string
+          declared_customer_name?: string | null
+          declared_customer_phone?: string | null
           duration_minutes?: number
           ends_at?: string
           id?: string
@@ -113,6 +121,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["appointment_status"]
           updated_at?: string
           vehicle_id?: string | null
+          verified_origin_hash?: string | null
         }
         Relationships: [
           {
@@ -144,6 +153,27 @@ export type Database = {
             referencedColumns: ["id", "business_id"]
           },
         ]
+      }
+      booking_origin_counters: {
+        Row: {
+          attempts: number
+          origin_hash: string
+          scope: string
+          window_start: string
+        }
+        Insert: {
+          attempts?: number
+          origin_hash: string
+          scope: string
+          window_start: string
+        }
+        Update: {
+          attempts?: number
+          origin_hash?: string
+          scope?: string
+          window_start?: string
+        }
+        Relationships: []
       }
       business_hours: {
         Row: {
@@ -485,7 +515,23 @@ export type Database = {
         Returns: string[]
       }
       is_business_member: { Args: { _business_id: string }; Returns: boolean }
+      media_business_id: { Args: { _path: string }; Returns: string }
       normalize_phone: { Args: { _p: string }; Returns: string }
+      submit_verified_booking: {
+        Args: {
+          _name: string
+          _notes: string
+          _origin_hash: string
+          _phone: string
+          _plate: string
+          _request_key: string
+          _service_id: string
+          _slug: string
+          _starts_at: string
+          _vehicle_model: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       appointment_status:

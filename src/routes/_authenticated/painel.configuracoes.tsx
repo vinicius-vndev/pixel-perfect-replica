@@ -1,3 +1,5 @@
+import { pageHead } from "@/lib/page-head";
+import { QueryError } from "@/components/QueryError";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -12,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 
-export const Route = createFileRoute("/_authenticated/painel/configuracoes")({ component: Settings });
+export const Route = createFileRoute("/_authenticated/painel/configuracoes")({ head: () => pageHead("Configurações", "Gerencie os dados e horários da sua estética."), component: Settings });
 
 function Settings() {
   return (
@@ -103,6 +105,7 @@ function HoursForm() {
   return (
     <section className="space-y-4 rounded-lg border bg-card p-5">
       <h2 className="text-2xl font-semibold uppercase">Horários de funcionamento</h2>
+      {q.error && <QueryError onRetry={() => { void q.refetch(); }} />}
       <div className="space-y-3">
         {rows.map((r, i) => (
           <div key={r.weekday} className="grid grid-cols-2 items-center gap-2 border-b pb-3 sm:grid-cols-[130px_repeat(4,1fr)]">
@@ -118,7 +121,7 @@ function HoursForm() {
           </div>
         ))}
       </div>
-      <Button variant="hero" onClick={save}>Salvar horários</Button>
+      <Button variant="hero" onClick={save} disabled={q.isPending || q.isError}>Salvar horários</Button>
     </section>
   );
 }
@@ -162,6 +165,7 @@ function Blocks() {
         <Input placeholder="Motivo" value={reason} onChange={(e) => setReason(e.target.value)} />
         <Button type="submit" variant="outline">Bloquear</Button>
       </form>
+      {q.error && <QueryError onRetry={() => { void q.refetch(); }} />}
       <ul className="space-y-2">
         {q.data?.map((x) => (
           <li key={x.id} className="flex items-center justify-between rounded border p-2 text-sm">

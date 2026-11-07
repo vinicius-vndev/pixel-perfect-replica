@@ -1,3 +1,4 @@
+import { QueryError } from "@/components/QueryError";
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -36,7 +37,7 @@ const NAV = [
 ] as const;
 
 function PanelLayout() {
-  const { data: business, isLoading, error } = useMyBusiness();
+  const { data: business, isLoading, error, refetch } = useMyBusiness();
   const qc = useQueryClient();
   const navigate = useNavigate();
 
@@ -48,7 +49,7 @@ function PanelLayout() {
   }
 
   if (isLoading) return <div className="p-8"><Skeleton className="h-40 w-full" /></div>;
-  if (error) return <div className="p-8 text-destructive">Erro ao carregar o painel. Recarregue a página.</div>;
+  if (error) return <div className="p-8"><QueryError onRetry={() => { void refetch(); }} /></div>;
   if (!business) return <CreateBusiness onSignOut={signOut} />;
 
   return (

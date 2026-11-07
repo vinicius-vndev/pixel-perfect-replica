@@ -1,3 +1,5 @@
+import { pageHead } from "@/lib/page-head";
+import { QueryError } from "@/components/QueryError";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Car, MessageCircle } from "lucide-react";
@@ -7,23 +9,24 @@ import { formatBRL, formatPhone, whatsAppLink } from "@/lib/detailhub";
 import { AppointmentCard, APPOINTMENT_SELECT, type AppointmentRow } from "@/components/AppointmentCard";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/_authenticated/painel/clientes/$id")({ component: CustomerPage });
+export const Route = createFileRoute("/_authenticated/painel/clientes/$id")({ head: () => pageHead("Histórico do cliente", "Consulte veículos e atendimentos do cliente."), component: CustomerPage });
 
 function CustomerPage() {
   const { id } = Route.useParams();
   const b = useBusiness();
   const q = useQuery({
-    queryKey: ["customer", id],
+    queryKey: ["customer", b.id, id],
     queryFn: async () => {
       const [c, v, a] = await Promise.all([
         supabase.from("customers").select("*").eq("id", id).eq("business_id", b.id).maybeSingle(),
-        supabase.from("vehicles").select("*").eq("customer_id", id),
-        supabase.from("appointments").select(APPOINTMENT_SELECT).eq("customer_id", id).order("starts_at", { ascending: false }),
+        supabase.from("vehicles").select("*").eq("customer_id", id).eq("business_id", b.id),
+        supabase.from("appointments").select(APPOINTMENT_SELECT).eq("customer_id", id).eq("business_id", b.id).order("starts_at", { ascending: false }),
       ]);
       if (c.error || v.error || a.error) throw c.error || v.error || a.error;
       return { customer: c.data, vehicles: v.data, appts: a.data as unknown as AppointmentRow[] };
     },
   });
+  if (q.error) return <QueryError onRetry={() => { void q.refetch(); }} />;
   if (q.isLoading) return <p className="text-muted-foreground">Carregando...</p>;
   if (!q.data?.customer) return <p>Cliente não encontrado.</p>;
   const { customer, vehicles, appts } = q.data;

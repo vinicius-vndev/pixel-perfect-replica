@@ -1,3 +1,5 @@
+import { pageHead } from "@/lib/page-head";
+import { QueryError } from "@/components/QueryError";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -9,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const Route = createFileRoute("/_authenticated/painel/agendamentos")({ component: Appointments });
+export const Route = createFileRoute("/_authenticated/painel/agendamentos")({ head: () => pageHead("Agendamentos", "Consulte solicitações e acompanhe seus agendamentos."), component: Appointments });
 
 function Appointments() {
   const b = useBusiness();
@@ -56,7 +58,7 @@ function Appointments() {
         </div>
         <div className="space-y-1"><Label htmlFor="c">Cliente</Label><Input id="c" placeholder="Nome ou telefone" value={client} onChange={(e) => setClient(e.target.value)} /></div>
       </div>
-      {q.isLoading ? <p className="text-muted-foreground">Carregando...</p> : q.error ? <p className="text-destructive">Erro ao carregar agendamentos.</p> : !items.length ? (
+      {q.isLoading ? <p className="text-muted-foreground">Carregando...</p> : q.error ? <QueryError onRetry={() => { void q.refetch(); }} /> : !items.length ? (
         <p className="rounded-lg border border-dashed p-6 text-center text-muted-foreground">Nenhum agendamento encontrado.</p>
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">{items.map((a) => <AppointmentCard key={a.id} a={a} business={b} />)}</div>

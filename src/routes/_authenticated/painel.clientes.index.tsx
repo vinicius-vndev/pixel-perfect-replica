@@ -1,3 +1,5 @@
+import { pageHead } from "@/lib/page-head";
+import { QueryError } from "@/components/QueryError";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -6,7 +8,7 @@ import { useBusiness } from "@/lib/business";
 import { formatPhone } from "@/lib/detailhub";
 import { Input } from "@/components/ui/input";
 
-export const Route = createFileRoute("/_authenticated/painel/clientes/")({ component: Customers });
+export const Route = createFileRoute("/_authenticated/painel/clientes/")({ head: () => pageHead("Clientes", "Consulte os clientes da sua estética."), component: Customers });
 
 function Customers() {
   const b = useBusiness();
@@ -26,7 +28,7 @@ function Customers() {
     <div className="space-y-6">
       <h1 className="text-4xl font-bold uppercase">Clientes</h1>
       <Input placeholder="Buscar por nome ou telefone" value={term} onChange={(e) => setTerm(e.target.value)} aria-label="Buscar cliente" />
-      {q.isLoading ? <p className="text-muted-foreground">Carregando...</p> : !items.length ? (
+      {q.error ? <QueryError onRetry={() => { void q.refetch(); }} /> : q.isLoading ? <p className="text-muted-foreground">Carregando...</p> : !items.length ? (
         <p className="rounded-lg border border-dashed p-6 text-center text-muted-foreground">Nenhum cliente encontrado. Eles aparecem aqui ao enviar um pedido.</p>
       ) : (
         <div className="divide-y rounded-lg border bg-card">

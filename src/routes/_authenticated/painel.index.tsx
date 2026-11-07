@@ -1,3 +1,5 @@
+import { pageHead } from "@/lib/page-head";
+import { QueryError } from "@/components/QueryError";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -10,7 +12,7 @@ import { AppointmentCard, APPOINTMENT_SELECT, type AppointmentRow } from "@/comp
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const Route = createFileRoute("/_authenticated/painel/")({ component: Overview });
+export const Route = createFileRoute("/_authenticated/painel/")({ head: () => pageHead("Visão geral", "Resumo da agenda e dos serviços da sua estética."), component: Overview });
 
 function Overview() {
   const b = useBusiness();
@@ -25,6 +27,7 @@ function Overview() {
         supabase.from("business_hours").select("id").eq("business_id", b.id).eq("is_open", true),
         supabase.from("services").select("id").eq("business_id", b.id).eq("is_active", true),
       ]);
+      if (h.error || s.error) throw h.error || s.error;
       return { hours: (h.data?.length ?? 0) > 0, services: (s.data?.length ?? 0) > 0 };
     },
   });
@@ -70,6 +73,7 @@ function Overview() {
     <div className="space-y-8">
       <h1 className="text-4xl font-bold uppercase">Visão geral</h1>
 
+      {setup.error && <QueryError onRetry={() => { void setup.refetch(); }} />}
       {incomplete && (
         <section className="rounded-lg border border-primary/50 bg-card p-5">
           <h2 className="text-2xl font-semibold uppercase">Configuração inicial</h2>
@@ -94,6 +98,7 @@ function Overview() {
         <Button asChild size="sm"><a href={link} target="_blank" rel="noreferrer">Abrir</a></Button>
       </section>
 
+      {stats.error && <QueryError onRetry={() => { void stats.refetch(); }} />}
       <section className="grid gap-4 sm:grid-cols-3">
         <Stat label="Solicitações pendentes" value={lists.data?.pending.length ?? "–"} highlight />
         <Stat label="Serviços concluídos" value={stats.data?.count ?? "–"} />
@@ -110,9 +115,11 @@ function Overview() {
         </div>
       </section>
 
+      {lists.error ? <QueryError onRetry={() => { void lists.refetch(); }} /> : <>
       <Block title="Solicitações pendentes" empty="Nenhuma solicitação aguardando aprovação." loading={lists.isLoading} items={lists.data?.pending} b={b} />
       <Block title="Agendamentos de hoje" empty="Nenhum atendimento hoje." loading={lists.isLoading} items={lists.data?.today} b={b} showDate={false} />
       <Block title="Próximos atendimentos" empty="Nenhum atendimento confirmado nos próximos dias." loading={lists.isLoading} items={lists.data?.upcoming} b={b} />
+      </>}
     </div>
   );
 }

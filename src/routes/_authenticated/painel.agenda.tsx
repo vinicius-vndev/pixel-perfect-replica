@@ -1,3 +1,5 @@
+import { pageHead } from "@/lib/page-head";
+import { QueryError } from "@/components/QueryError";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -10,7 +12,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const Route = createFileRoute("/_authenticated/painel/agenda")({ component: Agenda });
+export const Route = createFileRoute("/_authenticated/painel/agenda")({ head: () => pageHead("Agenda", "Consulte os atendimentos por dia e semana."), component: Agenda });
 
 function Agenda() {
   const b = useBusiness();
@@ -49,7 +51,7 @@ function Agenda() {
         <p className="ml-2 font-medium capitalize">{view === "dia" ? fmtYmdLong(day) : `${fmtYmdLong(start)} – ${fmtYmdLong(addDaysYmd(start, 6))}`}</p>
       </div>
 
-      {q.isLoading ? <p className="text-muted-foreground">Carregando...</p> : view === "dia" ? (
+      {q.error ? <QueryError onRetry={() => { void q.refetch(); }} /> : q.isLoading ? <p className="text-muted-foreground">Carregando...</p> : view === "dia" ? (
         !q.data?.length ? <p className="rounded-lg border border-dashed p-6 text-center text-muted-foreground">Nenhum atendimento neste dia.</p> :
           <div className="grid gap-3">{q.data.map((a) => <AppointmentCard key={a.id} a={a} business={b} showDate={false} />)}</div>
       ) : (
