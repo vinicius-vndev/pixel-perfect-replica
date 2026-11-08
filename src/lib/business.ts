@@ -14,7 +14,8 @@ export function useMyBusiness() {
   return useQuery({
     queryKey: ["my-business"],
     queryFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
       if (!u.user) return null;
       const { data: m, error } = await supabase
         .from("business_members")

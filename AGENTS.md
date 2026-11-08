@@ -11,7 +11,10 @@
 
 ## Architecture rules
 - Multi-tenant: every tenant row carries business_id and RLS uses `is_business_member()`; never trust client-supplied tenant checks.
-- Public booking and status changes go only through SECURITY DEFINER RPCs (`create_booking_request`, `get_available_slots`, `change_appointment_status`); clients have no direct insert/update on appointments so price, status and conflicts stay server-controlled.
+- Public booking passes through a server function verifying Turnstile and a signed visitor credential, then service-role-only SECURITY DEFINER RPCs; availability stays public and status changes require membership, keeping price/status/conflicts server-controlled.
+- Booking rate counters are persisted atomically per verified browser credential, not IP; hosting has no documented trusted IP header, so cookie reset remains an explicit limitation.
+- Preserve declared booking identity on each appointment separately from the customer record so anonymous submissions cannot rewrite existing customer names.
+- Shared query failure UI must distinguish errors from empty results and offer retry so failures do not hide records.
 - Double-booking is prevented by the gist exclusion constraint on appointments (pendente/confirmado), not by app code.
 - Media bucket is private (workspace blocks public buckets); store object paths and render via signed URLs (`useMediaUrl`).
 - Money is integer cents; times are timestamptz shown in the business timezone via helpers in src/lib/detailhub.ts.

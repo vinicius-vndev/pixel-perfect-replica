@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { getBookingProtectionConfig, submitBooking } from "@/lib/booking.functions";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
+import { QueryError } from "@/components/QueryError";
 import { CheckCircle2, Clock, MapPin, MessageCircle, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMediaUrl, type Business, type Service } from "@/lib/business";
@@ -36,7 +40,8 @@ function PublicPage() {
       const { data: b, error } = await supabase.from("businesses").select(PUBLIC_FIELDS).eq("slug", slug).maybeSingle();
       if (error) throw error;
       if (!b) return null;
-      const { data: s } = await supabase.from("services").select("id, name, description, price_cents, duration_minutes, image_url").eq("business_id", b.id).eq("is_active", true).order("price_cents");
+      const { data: s, error: servicesError } = await supabase.from("services").select("id, name, description, price_cents, duration_minutes, image_url").eq("business_id", b.id).eq("is_active", true).order("price_cents");
+      if (servicesError) throw servicesError;
       return { b: b as Business, services: (s ?? []) as Service[] };
     },
   });
@@ -44,6 +49,7 @@ function PublicPage() {
   const logo = useMediaUrl(q.data?.b.logo_url);
   const cover = useMediaUrl(q.data?.b.cover_url);
 
+  if (q.error) return <div className="mx-auto max-w-3xl p-6"><QueryError onRetry={() => { void q.refetch(); }} /></div>;
   if (q.isLoading) return <div className="mx-auto max-w-3xl space-y-4 p-6"><Skeleton className="h-48" /><Skeleton className="h-24" /></div>;
   if (!q.data) return <div className="flex min-h-screen items-center justify-center p-6 text-center"><div><h1 className="text-4xl font-bold uppercase">Estética não encontrada</h1><p className="text-muted-foreground">Verifique o link.</p></div></div>;
   const { b, services } = q.data;
@@ -116,6 +122,12 @@ function BookingFlow({ b, service, onBack }: { b: Business; service: Service; on
   const [requestKey] = useState(() => crypto.randomUUID());
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [resetKey, setResetKey] = useState(0);
+  const onToken = useCallback((value: string | null) => setToken(value), []);
+  const submit = useServerFn(submitBooking);
+  const protectionConfig = useServerFn(getBookingProtectionConfig);
+  const protection = useQuery({ queryKey: ["booking-protection"], queryFn: () => protectionConfig() });
 
   const slots = useQuery({
     queryKey: ["slots", b.slug, service.id, date],
@@ -136,21 +148,27 @@ function BookingFlow({ b, service, onBack }: { b: Business; service: Service; on
   }
 
   async function send() {
-    if (sending || !slot) return;
+    if (sending || !slot || !token) return;
     setSending(true);
     setErr(null);
-    const { error } = await supabase.rpc("create_booking_request", {
-      _slug: b.slug, _service_id: service.id, _starts_at: slot, _name: form.name, _phone: form.phone,
-      _vehicle_model: form.model, _plate: form.plate, _notes: form.notes, _request_key: requestKey,
-    });
-    setSending(false);
-    if (error) {
-      const msg = bookingErrorMessage(error.message);
-      setErr(msg);
-      if (error.message.includes("HORARIO_INDISPONIVEL")) { setSlot(null); setStep("time"); slots.refetch(); }
-      return;
+    try {
+      const result = await submit({ data: {
+        slug: b.slug, serviceId: service.id, startsAt: slot, name: form.name, phone: form.phone,
+        vehicleModel: form.model, plate: form.plate, notes: form.notes, requestKey, turnstileToken: token,
+      } });
+      if (result.error || !result.id) {
+        setErr(bookingErrorMessage(result.error));
+        if (result.error?.includes("HORARIO_INDISPONIVEL")) { setSlot(null); setStep("time"); void slots.refetch(); }
+        return;
+      }
+      setStep("done");
+    } catch {
+      setErr(bookingErrorMessage(undefined));
+    } finally {
+      setSending(false);
+      setToken(null);
+      setResetKey((value) => value + 1);
     }
-    setStep("done");
   }
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm({ ...form, [k]: e.target.value });
@@ -191,7 +209,7 @@ function BookingFlow({ b, service, onBack }: { b: Business; service: Service; on
           </div>
           <div>
             <h3 className="mb-2 text-xl font-semibold uppercase">2. Horários disponíveis</h3>
-            {slots.isLoading ? <p className="text-sm text-muted-foreground">Consultando horários...</p> : slots.error ? <p className="text-sm text-destructive">Erro ao consultar horários. Tente novamente.</p> : !slots.data?.length ? (
+            {slots.isLoading ? <p className="text-sm text-muted-foreground">Consultando horários...</p> : slots.error ? <QueryError onRetry={() => { void slots.refetch(); }} /> : !slots.data?.length ? (
               <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">Sem horários livres nesta data. Escolha outro dia.</p>
             ) : (
               <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
@@ -234,9 +252,10 @@ function BookingFlow({ b, service, onBack }: { b: Business; service: Service; on
             {form.notes && <Row k="Observação" v={form.notes} />}
           </dl>
           <p className="text-xs text-muted-foreground">O envio é uma solicitação. O agendamento só estará confirmado após a aprovação da estética.</p>
+          {protection.error ? <QueryError onRetry={() => { void protection.refetch(); }} /> : protection.isPending ? <p className="text-muted-foreground">Carregando verificação...</p> : protection.data?.siteKey ? <TurnstileWidget siteKey={protection.data.siteKey} resetKey={resetKey} onToken={onToken} /> : <p role="alert" className="text-destructive">Novas solicitações estão temporariamente indisponíveis. Entre em contato com a estética.</p>}
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setStep("data")} disabled={sending}>Voltar</Button>
-            <Button variant="hero" size="lg" className="flex-1" onClick={send} disabled={sending}>{sending ? "Enviando..." : err ? "Tentar novamente" : "Enviar solicitação"}</Button>
+            <Button variant="hero" size="lg" className="flex-1" onClick={send} disabled={sending || !token}>{sending ? "Enviando..." : err ? "Tentar novamente" : "Enviar solicitação"}</Button>
           </div>
         </div>
       )}

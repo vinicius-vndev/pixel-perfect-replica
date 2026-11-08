@@ -40,6 +40,8 @@ export type AppointmentRow = {
   price_cents: number;
   duration_minutes: number;
   notes: string | null;
+  declared_customer_name?: string | null;
+  declared_customer_phone?: string | null;
   customers: { id: string; name: string; phone: string } | null;
   vehicles: { model: string; plate: string | null } | null;
 };
@@ -73,7 +75,7 @@ export function AppointmentCard({ a, business, showDate = true }: { a: Appointme
   const waMsg =
     a.customers &&
     buildWhatsAppConfirmation({
-      customerName: a.customers.name,
+      customerName: a.declared_customer_name ?? a.customers.name,
       businessName: business.name,
       serviceName: a.service_name,
       startsAt: a.starts_at,
@@ -97,8 +99,9 @@ export function AppointmentCard({ a, business, showDate = true }: { a: Appointme
       </div>
       {a.customers && (
         <div className="mt-3 grid gap-1 text-sm text-muted-foreground">
-          <Link to="/painel/clientes/$id" params={{ id: a.customers.id }} className="font-medium text-foreground hover:text-primary">{a.customers.name}</Link>
-          <span className="flex items-center gap-1.5"><Phone className="size-3.5" />{formatPhone(a.customers.phone)}</span>
+          <Link to="/painel/clientes/$id" params={{ id: a.customers.id }} className="font-medium text-foreground hover:text-primary">{a.declared_customer_name ?? a.customers.name}</Link>
+          {a.declared_customer_name && a.declared_customer_name !== a.customers.name && <p>Nome cadastrado: {a.customers.name} · Nome informado no pedido: {a.declared_customer_name}</p>}
+          <span className="flex items-center gap-1.5"><Phone className="size-3.5" />{formatPhone(a.declared_customer_phone ?? a.customers.phone)}</span>
           {a.vehicles && <span className="flex items-center gap-1.5"><Car className="size-3.5" />{a.vehicles.model}{a.vehicles.plate ? ` · ${a.vehicles.plate}` : ""}</span>}
           {a.notes && <span className="italic">“{a.notes}”</span>}
         </div>
@@ -131,7 +134,7 @@ export function AppointmentCard({ a, business, showDate = true }: { a: Appointme
           })}
           {a.status === "confirmado" && a.customers && waMsg && (
             <Button asChild size="sm" variant="whatsapp">
-              <a href={whatsAppLink(a.customers.phone, waMsg)} target="_blank" rel="noreferrer">
+              <a href={whatsAppLink(a.declared_customer_phone ?? a.customers.phone, waMsg)} target="_blank" rel="noreferrer">
                 <MessageCircle /> Enviar confirmação pelo WhatsApp
               </a>
             </Button>

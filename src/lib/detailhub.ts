@@ -166,6 +166,11 @@ export function whatsAppLink(phone: string, text?: string): string {
 }
 
 const BOOKING_ERRORS: Record<string, string> = {
+  DATA_INVALIDA: "Informe uma data válida.",
+  DATA_PASSADA: "Escolha uma data e horário futuros.",
+  ANTECEDENCIA_MAXIMA: "O agendamento deve estar nos próximos 90 dias.",
+  PROTECAO_NAO_CONFIGURADA: "Novas solicitações estão temporariamente indisponíveis. Entre em contato com a estética.",
+  VERIFICACAO_FALHOU: "Não foi possível verificar a solicitação. Faça a verificação novamente.",
   HORARIO_INDISPONIVEL: "Esse horário acabou de ser reservado ou não está mais disponível. Escolha outro horário.",
   SERVICO_INDISPONIVEL: "Este serviço não está mais disponível.",
   ESTETICA_NAO_ENCONTRADA: "Estética não encontrada.",
