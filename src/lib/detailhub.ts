@@ -1,12 +1,7 @@
 // Pure helpers shared by the public page and the owner panel (no I/O).
 
 export type AppointmentStatus =
-  | "pendente"
-  | "confirmado"
-  | "recusado"
-  | "cancelado"
-  | "concluido"
-  | "nao_compareceu";
+  "pendente" | "confirmado" | "recusado" | "cancelado" | "concluido" | "nao_compareceu";
 
 export const STATUS_LABEL: Record<AppointmentStatus, string> = {
   pendente: "Pendente",
@@ -37,7 +32,10 @@ export function formatBRL(cents: number): string {
 
 /** "80,00" | "80" | "1.200,50" -> cents */
 export function parseBRLToCents(input: string): number | null {
-  const clean = input.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".");
+  const clean = input
+    .replace(/[R$\s]/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
   if (!/^\d+(\.\d{1,2})?$/.test(clean)) return null;
   return Math.round(parseFloat(clean) * 100);
 }
@@ -109,9 +107,11 @@ export function weekdayOfYmd(ymd: string): number {
 }
 
 export function fmtTime(iso: string | Date, tz: string): string {
-  return new Intl.DateTimeFormat("pt-BR", { timeZone: tz, hour: "2-digit", minute: "2-digit" }).format(
-    new Date(iso),
-  );
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
 }
 export function fmtDate(iso: string | Date, tz: string, opts?: Intl.DateTimeFormatOptions): string {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -169,9 +169,11 @@ const BOOKING_ERRORS: Record<string, string> = {
   DATA_INVALIDA: "Informe uma data válida.",
   DATA_PASSADA: "Escolha uma data e horário futuros.",
   ANTECEDENCIA_MAXIMA: "O agendamento deve estar nos próximos 90 dias.",
-  PROTECAO_NAO_CONFIGURADA: "Novas solicitações estão temporariamente indisponíveis. Entre em contato com a estética.",
+  PROTECAO_NAO_CONFIGURADA:
+    "Novas solicitações estão temporariamente indisponíveis. Entre em contato com a estética.",
   VERIFICACAO_FALHOU: "Não foi possível verificar a solicitação. Faça a verificação novamente.",
-  HORARIO_INDISPONIVEL: "Esse horário acabou de ser reservado ou não está mais disponível. Escolha outro horário.",
+  HORARIO_INDISPONIVEL:
+    "Esse horário acabou de ser reservado ou não está mais disponível. Escolha outro horário.",
   SERVICO_INDISPONIVEL: "Este serviço não está mais disponível.",
   ESTETICA_NAO_ENCONTRADA: "Estética não encontrada.",
   NOME_INVALIDO: "Informe seu nome completo.",
@@ -179,10 +181,13 @@ const BOOKING_ERRORS: Record<string, string> = {
   VEICULO_INVALIDO: "Informe o modelo do veículo.",
   PLACA_INVALIDA: "Placa inválida.",
   OBSERVACAO_LONGA: "A observação está muito longa.",
-  LIMITE_SOLICITACOES: "Muitas solicitações recentes. Aguarde a resposta da estética ou tente mais tarde.",
+  LIMITE_SOLICITACOES:
+    "Muitas solicitações recentes. Aguarde a resposta da estética ou tente mais tarde.",
 };
 export function bookingErrorMessage(raw: string | undefined): string {
   if (!raw) return "Não foi possível enviar. Verifique sua conexão e tente novamente.";
   const key = Object.keys(BOOKING_ERRORS).find((k) => raw.includes(k));
-  return key ? (BOOKING_ERRORS[key] ?? "") : "Não foi possível enviar. Verifique sua conexão e tente novamente.";
+  return key
+    ? (BOOKING_ERRORS[key] ?? "")
+    : "Não foi possível enviar. Verifique sua conexão e tente novamente.";
 }

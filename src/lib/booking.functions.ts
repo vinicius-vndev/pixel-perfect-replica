@@ -31,7 +31,11 @@ export const submitBooking = createServerFn({ method: "POST" })
 
     const host = getRequestHost().split(":")[0]?.toLowerCase();
     const verification = await verifyTurnstile(turnstileSecret, data.turnstileToken);
-    if (!verification.success || verification.action !== "booking" || verification.hostname?.toLowerCase() !== host) {
+    if (
+      !verification.success ||
+      verification.action !== "booking" ||
+      verification.hostname?.toLowerCase() !== host
+    ) {
       return { error: "VERIFICACAO_FALHOU" as const };
     }
 

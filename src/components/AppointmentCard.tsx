@@ -46,21 +46,47 @@ export type AppointmentRow = {
   vehicles: { model: string; plate: string | null } | null;
 };
 
-const ACTION: Record<AppointmentStatus, { label: string; variant: "success" | "destructive" | "outline" | "default"; confirm?: string }> = {
+const ACTION: Record<
+  AppointmentStatus,
+  { label: string; variant: "success" | "destructive" | "outline" | "default"; confirm?: string }
+> = {
   confirmado: { label: "Aprovar", variant: "success" },
-  recusado: { label: "Recusar", variant: "destructive", confirm: "Recusar esta solicitação? O horário será liberado." },
-  cancelado: { label: "Cancelar", variant: "outline", confirm: "Cancelar este agendamento? O horário será liberado." },
+  recusado: {
+    label: "Recusar",
+    variant: "destructive",
+    confirm: "Recusar esta solicitação? O horário será liberado.",
+  },
+  cancelado: {
+    label: "Cancelar",
+    variant: "outline",
+    confirm: "Cancelar este agendamento? O horário será liberado.",
+  },
   concluido: { label: "Concluir", variant: "default" },
-  nao_compareceu: { label: "Não compareceu", variant: "outline", confirm: "Marcar que o cliente não compareceu?" },
+  nao_compareceu: {
+    label: "Não compareceu",
+    variant: "outline",
+    confirm: "Marcar que o cliente não compareceu?",
+  },
   pendente: { label: "", variant: "outline" },
 };
 
-export function AppointmentCard({ a, business, showDate = true }: { a: AppointmentRow; business: Business; showDate?: boolean | undefined }) {
+export function AppointmentCard({
+  a,
+  business,
+  showDate = true,
+}: {
+  a: AppointmentRow;
+  business: Business;
+  showDate?: boolean | undefined;
+}) {
   const qc = useQueryClient();
   const tz = business.timezone;
   const m = useMutation({
     mutationFn: async (next: AppointmentStatus) => {
-      const { error } = await supabase.rpc("change_appointment_status", { _appointment_id: a.id, _new_status: next });
+      const { error } = await supabase.rpc("change_appointment_status", {
+        _appointment_id: a.id,
+        _new_status: next,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -85,7 +111,12 @@ export function AppointmentCard({ a, business, showDate = true }: { a: Appointme
     });
 
   return (
-    <div className={cn("rounded-lg border bg-card p-4", a.status === "pendente" && "border-status-pendente/60 ring-1 ring-status-pendente/30")}>
+    <div
+      className={cn(
+        "rounded-lg border bg-card p-4",
+        a.status === "pendente" && "border-status-pendente/60 ring-1 ring-status-pendente/30",
+      )}
+    >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="flex items-center gap-2 font-display text-xl font-semibold">
@@ -93,16 +124,39 @@ export function AppointmentCard({ a, business, showDate = true }: { a: Appointme
             {showDate && <span>{fmtDate(a.starts_at, tz, { weekday: "short" })} ·</span>}
             {fmtTime(a.starts_at, tz)}–{fmtTime(a.ends_at, tz)}
           </div>
-          <p className="font-semibold">{a.service_name} <span className="font-normal text-muted-foreground">· {formatBRL(a.price_cents)}</span></p>
+          <p className="font-semibold">
+            {a.service_name}{" "}
+            <span className="font-normal text-muted-foreground">· {formatBRL(a.price_cents)}</span>
+          </p>
         </div>
         <StatusBadge status={a.status} />
       </div>
       {a.customers && (
         <div className="mt-3 grid gap-1 text-sm text-muted-foreground">
-          <Link to="/painel/clientes/$id" params={{ id: a.customers.id }} className="font-medium text-foreground hover:text-primary">{a.declared_customer_name ?? a.customers.name}</Link>
-          {a.declared_customer_name && a.declared_customer_name !== a.customers.name && <p>Nome cadastrado: {a.customers.name} · Nome informado no pedido: {a.declared_customer_name}</p>}
-          <span className="flex items-center gap-1.5"><Phone className="size-3.5" />{formatPhone(a.declared_customer_phone ?? a.customers.phone)}</span>
-          {a.vehicles && <span className="flex items-center gap-1.5"><Car className="size-3.5" />{a.vehicles.model}{a.vehicles.plate ? ` · ${a.vehicles.plate}` : ""}</span>}
+          <Link
+            to="/painel/clientes/$id"
+            params={{ id: a.customers.id }}
+            className="font-medium text-foreground hover:text-primary"
+          >
+            {a.declared_customer_name ?? a.customers.name}
+          </Link>
+          {a.declared_customer_name && a.declared_customer_name !== a.customers.name && (
+            <p>
+              Nome cadastrado: {a.customers.name} · Nome informado no pedido:{" "}
+              {a.declared_customer_name}
+            </p>
+          )}
+          <span className="flex items-center gap-1.5">
+            <Phone className="size-3.5" />
+            {formatPhone(a.declared_customer_phone ?? a.customers.phone)}
+          </span>
+          {a.vehicles && (
+            <span className="flex items-center gap-1.5">
+              <Car className="size-3.5" />
+              {a.vehicles.model}
+              {a.vehicles.plate ? ` · ${a.vehicles.plate}` : ""}
+            </span>
+          )}
           {a.notes && <span className="italic">“{a.notes}”</span>}
         </div>
       )}
@@ -111,7 +165,13 @@ export function AppointmentCard({ a, business, showDate = true }: { a: Appointme
           {actions.map((s) => {
             const cfg = ACTION[s];
             const btn = (
-              <Button key={s} size="sm" variant={cfg.variant} disabled={m.isPending} onClick={cfg.confirm ? undefined : () => m.mutate(s)}>
+              <Button
+                key={s}
+                size="sm"
+                variant={cfg.variant}
+                disabled={m.isPending}
+                onClick={cfg.confirm ? undefined : () => m.mutate(s)}
+              >
                 {cfg.label}
               </Button>
             );
@@ -134,7 +194,11 @@ export function AppointmentCard({ a, business, showDate = true }: { a: Appointme
           })}
           {a.status === "confirmado" && a.customers && waMsg && (
             <Button asChild size="sm" variant="whatsapp">
-              <a href={whatsAppLink(a.declared_customer_phone ?? a.customers.phone, waMsg)} target="_blank" rel="noreferrer">
+              <a
+                href={whatsAppLink(a.declared_customer_phone ?? a.customers.phone, waMsg)}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <MessageCircle /> Enviar confirmação pelo WhatsApp
               </a>
             </Button>

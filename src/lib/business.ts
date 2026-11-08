@@ -25,7 +25,11 @@ export function useMyBusiness() {
         .maybeSingle();
       if (error) throw error;
       if (!m) return null;
-      const { data: b, error: e2 } = await supabase.from("businesses").select("*").eq("id", m.business_id).single();
+      const { data: b, error: e2 } = await supabase
+        .from("businesses")
+        .select("*")
+        .eq("id", m.business_id)
+        .single();
       if (e2) throw e2;
       return b;
     },
@@ -64,7 +68,9 @@ export async function uploadMedia(businessId: string, file: File, prefix: string
   if (file.size > 5 * 1024 * 1024) throw new Error("A imagem deve ter no máximo 5 MB.");
   const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
   const path = `${businessId}/${prefix}-${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from(MEDIA_BUCKET).upload(path, file, { contentType: file.type });
+  const { error } = await supabase.storage
+    .from(MEDIA_BUCKET)
+    .upload(path, file, { contentType: file.type });
   if (error) throw new Error("Falha no envio da imagem.");
   return path;
 }

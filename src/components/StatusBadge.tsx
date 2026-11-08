@@ -7,10 +7,17 @@ const STYLES: Record<AppointmentStatus, string> = {
   recusado: "bg-status-recusado/15 text-status-recusado border-status-recusado/40",
   cancelado: "bg-status-cancelado/15 text-status-cancelado border-status-cancelado/40",
   concluido: "bg-status-concluido/15 text-status-concluido border-status-concluido/40",
-  nao_compareceu: "bg-status-nao_compareceu/15 text-status-nao_compareceu border-status-nao_compareceu/40",
+  nao_compareceu:
+    "bg-status-nao_compareceu/15 text-status-nao_compareceu border-status-nao_compareceu/40",
 };
 
-export function StatusBadge({ status, className }: { status: AppointmentStatus; className?: string }) {
+export function StatusBadge({
+  status,
+  className,
+}: {
+  status: AppointmentStatus;
+  className?: string;
+}) {
   return (
     <span
       className={cn(

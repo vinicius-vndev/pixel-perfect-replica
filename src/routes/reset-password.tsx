@@ -26,11 +26,17 @@ function ResetPassword() {
   const navigate = useNavigate();
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 8) { toast.error("A senha deve ter pelo menos 8 caracteres."); return; }
+    if (password.length < 8) {
+      toast.error("A senha deve ter pelo menos 8 caracteres.");
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
-    if (error) { toast.error("Link expirado ou inválido. Solicite um novo."); return; }
+    if (error) {
+      toast.error("Link expirado ou inválido. Solicite um novo.");
+      return;
+    }
     toast.success("Senha atualizada!");
     navigate({ to: "/painel", replace: true });
   }
@@ -40,9 +46,18 @@ function ResetPassword() {
         <h1 className="text-3xl font-bold uppercase">Nova senha</h1>
         <div className="space-y-1.5">
           <Label htmlFor="pw">Nova senha</Label>
-          <Input id="pw" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required />
+          <Input
+            id="pw"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+            required
+          />
         </div>
-        <Button type="submit" variant="hero" className="w-full" disabled={loading}>{loading ? "Salvando..." : "Salvar senha"}</Button>
+        <Button type="submit" variant="hero" className="w-full" disabled={loading}>
+          {loading ? "Salvando..." : "Salvar senha"}
+        </Button>
       </form>
     </div>
   );

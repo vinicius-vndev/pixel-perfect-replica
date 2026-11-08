@@ -41,6 +41,8 @@ describe("DetailHub rules", () => {
   });
 
   it("converts São Paulo wall time to UTC", () => {
-    expect(zonedToUtc("2026-11-10", "14:00", "America/Sao_Paulo").toISOString()).toBe("2026-11-10T17:00:00.000Z");
+    expect(zonedToUtc("2026-11-10", "14:00", "America/Sao_Paulo").toISOString()).toBe(
+      "2026-11-10T17:00:00.000Z",
+    );
   });
 });
