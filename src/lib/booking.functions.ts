@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getCookie, getRequestHost, setCookie } from "@tanstack/react-start/server";
+import { getCookie, getRequest, setCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 const COOKIE = "dh_booking_origin";
@@ -29,7 +29,7 @@ export const submitBooking = createServerFn({ method: "POST" })
       return { error: "PROTECAO_NAO_CONFIGURADA" as const };
     }
 
-    const host = getRequestHost().split(":")[0]?.toLowerCase();
+    const host = new URL(getRequest().url).hostname.toLowerCase();
     const verification = await verifyTurnstile(turnstileSecret, data.turnstileToken);
     if (
       !verification.success ||
